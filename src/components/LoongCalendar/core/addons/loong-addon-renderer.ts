@@ -1,5 +1,5 @@
 import type { LoongCalendaerRendererOptions } from '../../types'
-import type { LoongCalendar } from '../../'
+import type { LoongCalendarManager } from '../../'
 import { LRUCache, throttle } from '../utils'
 import { LoongAddon } from './loong-addon'
 import type { ScheduleRenderData } from './loong-addon-manager'
@@ -87,7 +87,7 @@ export class Renderer extends LoongAddon {
    */
   private renderDataUpdateThrottle = throttle(this.renderDataUpdate)
 
-  constructor(loong: LoongCalendar, options: LoongCalendaerRendererOptions) {
+  constructor(loong: LoongCalendarManager, options: LoongCalendaerRendererOptions) {
     super(loong)
 
     this.yScale = Math.max(1, options.gridRendererOptions.yScale)

@@ -5,6 +5,9 @@ import { Observer } from './core/addons/loong-addon-observer'
 import { Events } from './core/addons/loong-addon-events'
 import { Manager } from './core/addons/loong-addon-manager'
 import { Options } from './core/addons/loong-addon-options'
+import LoongCalendar from './calendar.vue'
+
+export { LoongCalendar }
 
 export * from './core'
 
@@ -20,7 +23,7 @@ ___________________
   )
 }
 
-export class LoongCalendar extends EventEmitter<LoongEvents> {
+export class LoongCalendarManager extends EventEmitter<LoongEvents> {
   private __map
 
   readonly id: string
@@ -32,7 +35,7 @@ export class LoongCalendar extends EventEmitter<LoongEvents> {
 
   private __oneSecondTimer: null | NodeJS.Timeout = null
 
-  constructor(id: string, options: LoongCalendarOptions, map: Map<string, LoongCalendar>) {
+  constructor(id: string, options: LoongCalendarOptions, map: Map<string, LoongCalendarManager>) {
     super()
 
     consoleLC()
@@ -86,16 +89,16 @@ export class LoongCalendar extends EventEmitter<LoongEvents> {
   }
 }
 
-const map = new Map<string, LoongCalendar>()
+const map = new Map<string, LoongCalendarManager>()
 
 export function useCalendar(id: string, options: LoongCalendarOptions = {}) {
-  if (!map.has(id)) map.set(id, new LoongCalendar(id, options, map))
-  return map.get(id) as LoongCalendar
+  if (!map.has(id)) map.set(id, new LoongCalendarManager(id, options, map))
+  return map.get(id) as LoongCalendarManager
 }
 
 export function destoryCalendar(id: string) {
   if (!map.has(id)) return false
-  const calendar = map.get(id) as LoongCalendar
+  const calendar = map.get(id) as LoongCalendarManager
   calendar.destroy()
   map.delete(id)
   return true

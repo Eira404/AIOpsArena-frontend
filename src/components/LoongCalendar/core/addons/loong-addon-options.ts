@@ -1,4 +1,4 @@
-import type { LoongCalendar } from '../../'
+import type { LoongCalendarManager } from '../../'
 import type {
   LoongCalendarCurrentTimeRendererOptions,
   LoongCalendarDateRendererOptions,
@@ -149,7 +149,7 @@ export class Options extends LoongAddon {
   private __categories: string[] = []
   private __currentTheme: string = 'light'
 
-  constructor(loong: LoongCalendar, options: LoongCalendarOptions, theme?: string) {
+  constructor(loong: LoongCalendarManager, options: LoongCalendarOptions, theme?: string) {
     super(loong)
 
     deepMerge(this.__options, options)

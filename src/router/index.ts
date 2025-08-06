@@ -16,7 +16,7 @@ const router = createRouter({
       component: () => import('../views/Home/index.vue')
     },
     {
-      path: '/Microservice',
+      path: '/microservice',
       name: 'microservice',
       component: () => import('../views/Microservice/index.vue')
     },
@@ -196,7 +196,7 @@ useCalendar(CalendarFaultsManager.CAL_KEY, {
   grid: {
     yScale: 5
   },
-  categories: ['unknown', 'fault']
+  categories: ['pod', 'service', 'Unknown']
 })
 
 const madison = Madison.getInstance(router)

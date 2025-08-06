@@ -1,5 +1,5 @@
 import { LoongCanvasCursorLevel, type LoongCanvasCursor } from '../../types'
-import type { LoongCalendar } from '../../'
+import type { LoongCalendarManager } from '../../'
 import { BinaryHeap } from '../utils'
 import { LoongAddon } from './loong-addon'
 
@@ -82,7 +82,7 @@ export class Events extends LoongAddon {
     }
   }
 
-  constructor(loong: LoongCalendar) {
+  constructor(loong: LoongCalendarManager) {
     super(loong)
 
     this.__loong.on('canvas-online', this.canvasOnline, this)

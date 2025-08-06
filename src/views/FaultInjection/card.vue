@@ -45,7 +45,7 @@ const top = computed(() => {
   >
     <div>
       <span class="text-lg font-bold mr-3">{{ schedule.title }}</span>
-      <span>{{ t('FaultInjection.DetailDialog.Category') }}: {{ schedule.category }}</span>
+      <span>{{ t('FaultInjection.DetailDialog.Type') }}: {{ schedule.type }}</span>
     </div>
     <div>
       {{ schedule.content }}

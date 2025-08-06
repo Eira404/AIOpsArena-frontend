@@ -7,14 +7,14 @@ import type { GetInjectionResForManager, GetInjectionResItem, GetInjectionResIte
 import { getDatesForNextSevenDays, MadisonItemMap, MadisonMapItem, parseTimeToSeconds } from '@/core/madison/utils'
 import { computed, reactive, ref, type ComputedRef, type Reactive, type Ref, type WritableComputedRef } from 'vue'
 import { getFutureInjection, getHistoryInjection, getInjectionResult } from './api'
-import { getSundayOfTheWeek, LoongSchedule, now, ScheduleRenderData, useCalendar, type LoongCalendar } from '@/components/LoongCalendar'
+import { getSundayOfTheWeek, LoongCalendarManager, LoongSchedule, now, ScheduleRenderData, useCalendar } from '@/components/LoongCalendar'
 
 export class FaultItem {
   readonly id: string
   readonly renderId: string
   readonly schedule: LoongSchedule
-  private __calendar: LoongCalendar
-  constructor(data: GetInjectionResForManager, calendar: LoongCalendar) {
+  private __calendar: LoongCalendarManager
+  constructor(data: GetInjectionResForManager, calendar: LoongCalendarManager) {
     this.id = data.id
     this.renderId = data.id + '-' + Math.floor(Math.random() * 1000000000000).toString()
     this.schedule = new LoongSchedule(
@@ -22,7 +22,7 @@ export class FaultItem {
       this.renderId,
       data.name,
       '',
-      'fault',
+      data.category,
       new Date(data.timestamp * 1000),
       new Date(data.timestamp * 1000 + data.duration * 1000),
       data
@@ -47,9 +47,9 @@ export class OnedayFaults extends MadisonMapItem<string> {
   readonly date: Date
   readonly dateStr: string
   private __faults: Map<string, FaultItem> = new Map()
-  private __calendar: LoongCalendar
+  private __calendar: LoongCalendarManager
 
-  constructor(date: Date, calendar: LoongCalendar) {
+  constructor(date: Date, calendar: LoongCalendarManager) {
     super()
     this.date = date
     this.dateStr = date.toISOString().substring(0, 10)
@@ -113,7 +113,8 @@ class OnedayFaultsMap extends MadisonItemMap<string, OnedayFaults> {
 export class CalendarFaultsRenderManager extends MadisonAddon {
   static readonly CAL_DEF_NAMESPACE = 'no-selected'
 
-  private __calendar: LoongCalendar
+  private __calendar: LoongCalendarManager
+  private __faultManager: FaultManager
   private __namespace: Ref<string> = ref(CalendarFaultsRenderManager.CAL_DEF_NAMESPACE)
 
   private __datesToWaitForLoading: Reactive<Map<string, Set<string>>> = reactive(new Map())
@@ -159,10 +160,11 @@ export class CalendarFaultsRenderManager extends MadisonAddon {
   // Map<namespace, OnedayFaultsMap>
   private __data: Map<string, OnedayFaultsMap> = new Map()
 
-  constructor(madison: Madison, calendar: LoongCalendar) {
+  constructor(madison: Madison, calendar: LoongCalendarManager, faultManager: FaultManager) {
     super(madison)
 
     this.__calendar = calendar
+    this.__faultManager = faultManager
   }
 
   has(namespace: string, date: string): boolean {
@@ -191,13 +193,15 @@ export class CalendarFaultsRenderManager extends MadisonAddon {
       res.forEach((res, i) => {
         if (res.status !== 'fulfilled') return
         const data = res.value.data
+        const errSet = this.__datesToWaitForLoadingError.get(namespace) as Set<string>
+        const set = this.__datesToWaitForLoading.get(namespace) as Set<string>
         if (data.code === 0) {
-          const set = this.__datesToWaitForLoading.get(namespace) as Set<string>
-          const errSet = this.__datesToWaitForLoadingError.get(namespace) as Set<string>
           if (data.data.status === 'SUCCESS') {
             const list: GetInjectionResItem[] | GetInjectionResItemHistory[] = Object.values(data.data.result)
             const addList: GetInjectionResForManager[] = list.map((item) => {
               const temp = item as any
+              const category = this.__faultManager.getFaultCategory(temp.spec.kind as string) || 'Unknown'
+              const type = this.__faultManager.getFaultType(temp.spec.kind as string) || 'Unknown'
               if (temp.id) {
                 const t = temp as GetInjectionResItem
                 return {
@@ -205,6 +209,9 @@ export class CalendarFaultsRenderManager extends MadisonAddon {
                   name: t.name,
                   timestamp: t.timestamp,
                   duration: parseTimeToSeconds(t.spec.duration),
+                  kind: t.kind,
+                  category,
+                  type,
                   meta: t
                 }
               } else {
@@ -214,6 +221,9 @@ export class CalendarFaultsRenderManager extends MadisonAddon {
                   name: t.name,
                   timestamp: t.timestamp,
                   duration: parseTimeToSeconds(t.spec.duration),
+                  kind: t.kind,
+                  category,
+                  type,
                   meta: t
                 }
               }
@@ -225,6 +235,9 @@ export class CalendarFaultsRenderManager extends MadisonAddon {
             errSet.add(date)
             taskIdSet.delete(taskIds[i])
           }
+        } else {
+          errSet.add(date)
+          taskIdSet.delete(taskIds[i])
         }
       })
       if (taskIdSet.size === 0) {
@@ -263,7 +276,7 @@ export class CalendarFaultsRenderManager extends MadisonAddon {
 export class CalendarFaultsManager extends MadisonAddon {
   static readonly CAL_KEY = 'FalurHistoryCalendar'
   readonly faultManager: FaultManager
-  private __calendar: LoongCalendar
+  private __calendar: LoongCalendarManager
   private __renderType: 'week' | 'date'
   private __renderDay: Date
   private __renderWeek: Date
@@ -329,6 +342,7 @@ export class CalendarFaultsManager extends MadisonAddon {
     content?: string
     startTime?: Date
     endTime?: Date
+    type?: string
   }> = reactive({})
 
   get cardVisible() {
@@ -370,7 +384,7 @@ export class CalendarFaultsManager extends MadisonAddon {
     madiosn.routerPromise.addCheck(this.check, this)
     madiosn.routerPromise.addPostcheck(this.postcheck, this)
 
-    this.__manager = new CalendarFaultsRenderManager(madiosn, this.__calendar)
+    this.__manager = new CalendarFaultsRenderManager(madiosn, this.__calendar, faultManager)
 
     // this.__calendar.on('canvas-online', this.canvasOnLine, this)
     // this.__calendar.on('canvas-offline', this.canvasOffline, this)
@@ -388,6 +402,7 @@ export class CalendarFaultsManager extends MadisonAddon {
     this.__scheduleRenderData.title = schedule.schedule.title
     this.__scheduleRenderData.startTime = schedule.timeRange.startTime
     this.__scheduleRenderData.endTime = schedule.timeRange.endTime
+    this.__scheduleRenderData.type = schedule.schedule.meta.type
   }
 
   private renderDataOut(schedule: ScheduleRenderData) {
@@ -407,6 +422,7 @@ export class CalendarFaultsManager extends MadisonAddon {
     this.__scheduleRenderData.title = schedule.schedule.title
     this.__scheduleRenderData.startTime = schedule.timeRange.startTime
     this.__scheduleRenderData.endTime = schedule.timeRange.startTime
+    this.__scheduleRenderData.type = schedule.schedule.meta.type
   }
 
   private renderTypeChange(type: 'week' | 'date') {
@@ -510,6 +526,8 @@ export class CalendarFaultsManager extends MadisonAddon {
       const status = item.status
       if (status !== 'fulfilled') return
       const value = item.value
+      /** taskId不存在 */
+      if (value[0] === '') return
       if (value[2]) {
         todayRes.push([namespace, value[1], value[0]])
         return

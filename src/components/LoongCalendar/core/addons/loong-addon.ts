@@ -1,9 +1,9 @@
-import type { LoongCalendar } from '../../'
+import type { LoongCalendarManager } from '../../'
 
 export abstract class LoongAddon {
-  readonly __loong: LoongCalendar
+  readonly __loong: LoongCalendarManager
 
-  constructor(loong: LoongCalendar) {
+  constructor(loong: LoongCalendarManager) {
     this.__loong = loong
     this.__loong.on('destory', this.destroy, this)
   }

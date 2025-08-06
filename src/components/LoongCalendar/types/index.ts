@@ -68,9 +68,8 @@ export interface LoongEvents {
   'schedule-mouse-move': [MouseEvent, ScheduleRenderData]
   'schedule-mouse-click': [MouseEvent, ScheduleRenderData]
   'schedule-mouse-double-click': [MouseEvent, ScheduleRenderData]
-  // 日程的鼠标事件
-  'clear': []
   // 清除所有数据
-  'reset': []
+  'clear': []
   // 恢复初始状态
+  'reset': []
 }

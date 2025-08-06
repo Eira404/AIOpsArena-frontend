@@ -1,11 +1,11 @@
-import type { LoongCalendar } from '../../'
+import type { LoongCalendarManager } from '../../'
 import { LoongAddon } from './loong-addon'
 
 export class Observer extends LoongAddon {
   private __observer: MutationObserver
   private __canvasIsReady = false
 
-  constructor(loong: LoongCalendar) {
+  constructor(loong: LoongCalendarManager) {
     super(loong)
 
     this.__observer = new MutationObserver((mutations) => {

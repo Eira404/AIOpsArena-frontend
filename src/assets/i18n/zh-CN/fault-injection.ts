@@ -21,7 +21,7 @@ export default {
   ErrorDates: '报错日期',
   DetailDialog: {
     FaultDetail: '故障详情',
-    Category: '分类',
+    Type: '类型',
     Delete: '删除',
     Name: '名称',
     Timestamp: '时间戳',

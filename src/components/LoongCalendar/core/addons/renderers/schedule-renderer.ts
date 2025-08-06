@@ -257,6 +257,12 @@ export class ScheduleRenderer extends RendererBase {
     ctx.clip()
     // 渲染文字
     ctx.font = `${this.__options.titleFontSize}px ${this.__options.titleFontFamily}`
+    const textW = ctx.measureText(title).width
+    if (textW > width - 8 || height - 6 < this.__options.titleFontSize) {
+      ctx.restore()
+      return
+    }
+
     ctx.fillText(title, x + 10, y + this.__options.titleFontSize + 3)
     ctx.font = `${this.__options.contentFontSize}px ${this.__options.contentFontFamily}`
     ctx.fillText(content, x + 10, y + this.__options.titleFontSize + this.__options.contentFontSize + 3 * 2)
