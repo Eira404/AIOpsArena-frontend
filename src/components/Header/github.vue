@@ -4,7 +4,7 @@ import githubIcon from './githubIcon.vue'
 
 <template>
   <a
-    href="https://github.com/SakuraLong/AIOpsArena-frontend"
+    href="https://github.com/Eira404/AIOpsArena-frontend"
     target="_blank"
     class=" hover:text-moonlight-500 transition-all"
   >

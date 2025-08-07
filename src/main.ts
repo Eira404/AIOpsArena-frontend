@@ -22,7 +22,7 @@ console.log(
   'color:#white; font-size:20px; font-weight:bold;'
 )
 
-console.log('%cProduced by SakuraLong → https://github.com/SakuraLong/AIOpsArena-frontend',
+console.log('%cProduced by Eira404 → https://github.com/Eira404/AIOpsArena-frontend',
   'font-size:16px; font-weight:bold;'
 )
 
