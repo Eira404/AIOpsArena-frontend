@@ -1,4 +1,4 @@
-import type { LoongCalendar } from '..'
+import type { LoongCalendarManager } from '..'
 import { LoongCalendarScheduleStatus, type LoongScheduleBaseData, type LoongScheduleLoopData, type LoongScheduleOnceData } from '../types'
 import { getDate0000, LRUCache } from './utils'
 
@@ -31,7 +31,7 @@ export class LoongSchedule {
   static readonly DEF_MIN_TIMESTAMP = 0
   static readonly MAX_TIMESTAMP = 253402271999999
   static readonly DEF_MAX_TIMESTAMP = 253402271999999
-  private __loong: LoongCalendar
+  private __loong: LoongCalendarManager
   private __status: LoongCalendarScheduleStatus = LoongCalendarScheduleStatus.READY
   readonly once: boolean
   readonly id: string
@@ -69,7 +69,7 @@ export class LoongSchedule {
    * ```ts
    * new LoongSchedule(calendar, 'id', 'title', 'content', 'category', new Date('2025-05-31 12:00:00'), new Date('2025-06-01 12:00:00'), {})
    * ```
-   * @param calendar LoongCalendar
+   * @param calendar LoongCalendarManager
    * @param id id
    * @param title title
    * @param content content
@@ -79,7 +79,7 @@ export class LoongSchedule {
    * @param meta 其他信息
    */
   constructor(
-    calendar: LoongCalendar,
+    calendar: LoongCalendarManager,
     id: string,
     title: string,
     content: string,
@@ -118,7 +118,7 @@ export class LoongSchedule {
    * @param meta 其他信息
    */
   constructor(
-    calendar: LoongCalendar,
+    calendar: LoongCalendarManager,
     id: string,
     title: string,
     content: string,
@@ -134,7 +134,7 @@ export class LoongSchedule {
     meta?: Record<any, any>,
   )
   constructor(
-    calendar: LoongCalendar,
+    calendar: LoongCalendarManager,
     id: string,
     title: string,
     content: string,

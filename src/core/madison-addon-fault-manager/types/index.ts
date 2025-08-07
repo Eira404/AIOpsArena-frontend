@@ -88,8 +88,11 @@ export interface GetInjectionResRes {
 export interface GetInjectionResForManager {
   id: string
   name: string
+  kind: string
   timestamp: number
   duration: number
+  category: string
+  type: string
   meta?: any
 }
 

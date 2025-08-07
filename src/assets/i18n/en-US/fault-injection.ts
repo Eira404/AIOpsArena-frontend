@@ -21,7 +21,7 @@ export default {
   ErrorDates: 'Error dates',
   DetailDialog: {
     FaultDetail: 'Fault Detail',
-    Category: 'Category',
+    Type: 'Type',
     Delete: 'Delete',
     Name: 'Name',
     Timestamp: 'Timestamp',

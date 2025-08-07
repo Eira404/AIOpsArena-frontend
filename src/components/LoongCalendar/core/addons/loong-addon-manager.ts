@@ -7,7 +7,7 @@ import {
   type WatchHandle,
   type WritableComputedRef
 } from 'vue'
-import type { LoongCalendar } from '../../'
+import type { LoongCalendarManager } from '../../'
 import { LoongAddon } from './loong-addon'
 import type { LoongSchedule, TimeRange } from '../schedule'
 import { BPlusTree } from '../utils/BPlusTree'
@@ -499,7 +499,7 @@ export class Manager extends LoongAddon {
   /** 管理器周模式日期改变监视器 */
   private __weekWatcher: WatchHandle
 
-  constructor(calendar: LoongCalendar) {
+  constructor(calendar: LoongCalendarManager) {
     super(calendar)
 
     this.__loong.on('frame-update', this.frameUpdate, this)

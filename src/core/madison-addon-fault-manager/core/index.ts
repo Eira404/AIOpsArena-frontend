@@ -19,11 +19,14 @@ export class FaultManager extends MadisonAddon {
     return this.__faultParamsPromise.promise
   }
   readonly calendarFaultsManager: CalendarFaultsManager
-
+  /** Map<namespace, string[]> */
   private __podListMap: Map<string, string[]> = new Map()
-
-  // Map<namespace, Map<cayegory, Map<name, FaultDetail>>>
+  /** Map<namespace, Map<category, Map<name, FaultDetail>>> */
   private __faultsData: Map<string, Map<string, Map<string, FaultDetail>>> = new Map()
+  /** Map<fault-name, category> */
+  private __faultsCategory: Map<string, string> = new Map()
+  /** Map<fault-name, type> */
+  private __faultsType: Map<string, string> = new Map()
 
   private __namespace: Ref<string> = ref('')
 
@@ -131,7 +134,7 @@ export class FaultManager extends MadisonAddon {
     await this.__madison.namespace.waitingForNamespaceGet
     await Promise.allSettled(promises)
 
-    this.checkPodFaults(namespace)
+    this.checkAllTypeFaults(namespace)
   }
 
   private postcheck(
@@ -142,26 +145,31 @@ export class FaultManager extends MadisonAddon {
     return
   }
 
-  private checkPodFaults(namespace: string) {
-    const faultsMap = this.__faultsData.get(namespace) as Map<string, Map<string, FaultDetail>>
-    if (!faultsMap.has('pod')) faultsMap.set('pod', new Map())
-    const podFaultsMap = faultsMap.get('pod') as Map<string, FaultDetail>
+  private checkAllTypeFaults(namespace: string) {
     const podList = this.__podListMap.get(namespace)
     if (!podList) {
       console.warn(`podList is null ${namespace}`)
       return
     }
-    const podFaults = Object.values(this.__faultParams).filter((v) => v.category === 'pod')
-    podFaults.forEach((fault) => {
-      if (podFaultsMap.has(fault.name)) return
-      podFaultsMap.set(
-        fault.name,
-        new FaultDetail(this, fault, {
-          namespaces: this.__madison.namespace.namespaces.value,
-          podList,
-          namespace
-        })
-      )
+    const faultsMap = this.__faultsData.get(namespace) as Map<string, Map<string, FaultDetail>>
+    const categories = Array.from(new Set(Object.values(this.__faultParams).map(v => v.category)))
+    categories.forEach(cate => {
+      if (!faultsMap.has(cate)) faultsMap.set(cate, new Map())
+      const categoryFaultsMap = faultsMap.get(cate) as Map<string, FaultDetail>
+      const cateFaults = Object.values(this.__faultParams).filter((v) => v.category === cate)
+      cateFaults.forEach((fault) => {
+        this.__faultsCategory.set(fault.name, cate)
+        this.__faultsType.set(fault.name, fault.type)
+        if (categoryFaultsMap.has(fault.name)) return
+        categoryFaultsMap.set(
+          fault.name,
+          new FaultDetail(this, fault, {
+            namespaces: this.__madison.namespace.namespaces.value,
+            podList,
+            namespace
+          })
+        )
+      })
     })
   }
 
@@ -185,6 +193,14 @@ export class FaultManager extends MadisonAddon {
     }
     this.messageI18n('FaultManager.Delete.Failure')
     return false
+  }
+
+  getFaultCategory(faultName: string) {
+    return this.__faultsCategory.get(faultName)
+  }
+
+  getFaultType(faultName: string) {
+    return this.__faultsType.get(faultName)
   }
 
   logoutCallback(): void {}
